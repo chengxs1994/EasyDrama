@@ -2,6 +2,16 @@
 
 本地运行的短剧创作工作台，将作品、分集、共享角色、分镜画布和 3D 空间推演连接起来。使用 Vite + Three.js + 原生 JavaScript，无需账号或 API Key。
 
+## 界面展示
+
+作品概览：集中管理分集与角色，从首页进入空间推演。
+
+![EasyDrama 简剧作品概览与空间推演入口](assets/screenshots/workbench-overview.png)
+
+3D 空间推演：搭建场景、安排人物站位，调整摄影机与走位时间轴。
+
+![EasyDrama 简剧 3D 空间推演编辑器](assets/screenshots/spatial-editor.png)
+
 ## 本地启动
 
 需要 Node.js 22 或更高版本。
