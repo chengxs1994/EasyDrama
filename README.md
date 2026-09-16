@@ -12,6 +12,10 @@
 
 ![EasyDrama 简剧 3D 空间推演编辑器](assets/screenshots/spatial-editor.png)
 
+人物行走预演（12 秒循环动图）：展示演员沿设定路径行走及时间进度。
+
+![EasyDrama 简剧人物行走预演动图](assets/screenshots/walking-preview.gif)
+
 ## 本地启动
 
 需要 Node.js 22 或更高版本。
