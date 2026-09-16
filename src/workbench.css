@@ -1206,3 +1206,205 @@
   line-height: 1.8;
   margin: 0;
 }
+/* 空间推演使用独立的主入口，与常规作品管理导航区分。 */
+.wb-nav button.wb-spatial-nav,
+.wb-nav button.wb-spatial-nav.active {
+  background: #5812ad;
+  border-color: #754b9f;
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 10px;
+  padding: 14px 12px;
+}
+.wb-nav button.wb-spatial-nav:hover {
+  background: #5812ad;
+  border-color: #c6b1de;
+}
+.wb-nav button.wb-spatial-nav.active {
+  box-shadow: inset 3px 0 #eee;
+}
+.wb-spatial-entry {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  overflow: hidden;
+  min-height: 225px;
+  border: 1px solid #554164;
+  border-radius: 9px;
+  background: #1c1822;
+  margin-bottom: 28px;
+}
+.wb-spatial-intro {
+  padding: 27px 30px;
+}
+.wb-spatial-intro h2 {
+  font-size: 27px;
+  margin: 0 0 13px;
+  font-weight: 600;
+}
+.wb-spatial-intro > p:not(.wb-eyebrow) {
+  color: #bcb7c4;
+  font-size: 12px;
+  line-height: 1.9;
+  margin: 0;
+}
+.wb-spatial-intro > div {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 23px;
+}
+.wb-spatial-intro > div > span {
+  color: #a9a1b4;
+  font-size: 11px;
+}
+.wb-spatial-intro button {
+  min-height: 39px;
+  padding: 9px 17px;
+}
+.wb-spatial-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 220px;
+  background: #15151a;
+}
+.wb-spatial-visual > img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  object-fit: cover;
+}
+.wb-spatial-visual > span {
+  position: absolute;
+  bottom: 17px;
+  left: 20px;
+  border: 1px solid #82738e70;
+  background: #16121ddb;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 10px;
+  color: #e1d9e8;
+}
+.wb-spatial-visual > svg {
+  width: 90px;
+  height: 90px;
+  stroke-width: 0.8;
+  color: #d2c9df;
+  transform: translateY(-7px);
+}
+.wb-spatial-grid {
+  position: absolute;
+  inset: -50%;
+  background-image:
+    linear-gradient(#74618040 1px, transparent 1px), linear-gradient(90deg, #74618040 1px, transparent 1px);
+  background-size: 42px 42px;
+  transform: perspective(360px) rotateX(58deg);
+}
+.wb-independent-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  background: #5812ad;
+  border: 1px solid #754b9f;
+  padding: 12px 17px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.wb-independent-link:hover {
+  border-color: #c6b1de;
+}
+.wb-spatial-scenes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+  gap: 20px;
+}
+.wb-spatial-scene {
+  overflow: hidden;
+  border: 1px solid #3a3242;
+  background: #1b1a20;
+  border-radius: 8px;
+}
+.wb-spatial-preview {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: #24212a;
+}
+.wb-spatial-preview > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.wb-spatial-preview > div {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  align-items: center;
+  justify-content: center;
+  color: #beb4cd;
+  font-size: 11px;
+}
+.wb-spatial-preview svg {
+  width: 42px;
+  height: 42px;
+  stroke-width: 1;
+}
+.wb-spatial-preview > span {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #16121de6;
+  padding: 5px 8px;
+  font-size: 10px;
+  border: 1px solid #65586f;
+  border-radius: 4px;
+}
+.wb-spatial-scene .wb-card-body > p {
+  margin-top: 0;
+  margin-bottom: 7px;
+}
+.wb-spatial-scene footer {
+  margin-top: 20px;
+}
+.wb-spatial-scene footer button.primary {
+  background: #5812ad;
+  border: 1px solid #754b9f;
+  color: #fff;
+  padding: 7px 12px;
+}
+@media (max-width: 1100px) {
+  .wb-spatial-entry {
+    grid-template-columns: 1.2fr 1fr;
+  }
+  .wb-spatial-intro {
+    padding: 22px;
+  }
+  .wb-spatial-intro > div {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .wb-independent-link {
+    flex-shrink: 1;
+  }
+}
+@media (max-width: 760px) {
+  .wb-spatial-entry {
+    grid-template-columns: 1fr;
+  }
+  .wb-spatial-visual {
+    display: none;
+  }
+  .wb-spatial-scenes {
+    grid-template-columns: 1fr;
+  }
+  .wb-independent-link {
+    font-size: 11px;
+  }
+  .wb-nav button.wb-spatial-nav {
+    padding: 12px 8px;
+  }
+}

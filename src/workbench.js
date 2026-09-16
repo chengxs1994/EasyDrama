@@ -86,7 +86,7 @@ try {
 const params = new URLSearchParams(location.search);
 let workId = params.get('work') || data.works[0]?.id;
 let episodeId = params.get('episode');
-let view = ['overview', 'episodes', 'characters', 'canvas', 'script'].includes(params.get('view'))
+let view = ['overview', 'episodes', 'characters', 'canvas', 'script', 'spatial'].includes(params.get('view'))
   ? params.get('view')
   : 'overview';
 let dialogState = null;
@@ -188,6 +188,7 @@ function render() {
   workId = work?.id;
   episodeId = ep?.id;
   const names = {
+    spatial: '空间推演',
     overview: '作品概览',
     episodes: '分集与分镜',
     characters: '角色库',
@@ -202,7 +203,7 @@ function render() {
   root.innerHTML = `<div class="wb-shell">
     <aside class="wb-sidebar"><a class="wb-brand" href="/" aria-label="EasyDrama 简剧">${ico('scan')}<strong>EasyDrama</strong><small>简剧</small></a>
       <div class="wb-work-select"><label for="work-select">当前作品</label><div><select id="work-select" aria-label="切换作品">${work ? data.works.map((w) => `<option value="${w.id}" ${w.id === workId ? 'selected' : ''}>${esc(w.title)}</option>`).join('') : '<option>暂无作品</option>'}</select>${button('new-work', '新建作品', 'plus', '', 'wb-icon')}</div></div>
-      <nav class="wb-nav">${[
+      <nav class="wb-nav">${button('view-spatial', '空间推演', 'box', `aria-current="${view === 'spatial' ? 'page' : 'false'}"`, `wb-spatial-nav ${view === 'spatial' ? 'active' : ''}`)}${[
         ['overview', '作品概览', 'layout-dashboard'],
         ['episodes', '分集与分镜', 'film'],
         ['characters', '角色库', 'users-round'],
@@ -222,7 +223,7 @@ function render() {
       <footer class="wb-side-footer"><span>${ico('check')} 本机创作空间</span><p>作品自动保存于当前浏览器</p><div>${button('export-work', '导出作品', 'download')}${button('import-work', '导入', 'upload')}</div><a href="/?editor=1">打开独立 3D 编辑器 ↗</a></footer></aside>
     <main class="wb-main"><header class="wb-topbar"><div><span>${esc(work?.title || '创作空间')}</span><b>/</b><strong>${names[view]}</strong></div><span class="wb-local">LOCAL <i></i> 本机存储</span></header>
     ${startupError ? `<div class="wb-warning">${esc(startupError)} ${button('raw-backup', '导出原始备份', 'download')}${button('recover-storage', '从作品文件恢复', 'upload')}</div>` : ''}
-    <div class="wb-content ${view === 'canvas' ? 'wb-canvas-content' : ''}">${!work ? empty('从一部作品开始', '建立作品、角色与分集，在同一个空间完成分镜创作。', 'new-work', '新建作品') : view === 'overview' ? overview(work) : view === 'characters' ? characters(work) : !ep ? empty('还没有分集', '为这部作品创建第一集。', 'new-episode', '新建分集') : view === 'script' ? scriptView(ep) : view === 'canvas' ? canvasView(work, ep) : episodeView(work, ep)}</div>
+    <div class="wb-content ${view === 'canvas' ? 'wb-canvas-content' : ''}">${view === 'spatial' ? spatialView(work) : !work ? empty('从一部作品开始', '建立作品、角色与分集，在同一个空间完成分镜创作。', 'new-work', '新建作品') : view === 'overview' ? overview(work) : view === 'characters' ? characters(work) : !ep ? empty('还没有分集', '为这部作品创建第一集。', 'new-episode', '新建分集') : view === 'script' ? scriptView(ep) : view === 'canvas' ? canvasView(work, ep) : episodeView(work, ep)}</div>
     </main></div><dialog id="wb-dialog"></dialog><div id="wb-notice" role="status" hidden></div><input id="wb-import" type="file" accept="application/json,.json" hidden>`;
   createIcons({ icons, attrs: { 'stroke-width': 1.6 } });
   document.getElementById('wb-import').addEventListener('change', importFile);
@@ -232,6 +233,7 @@ function render() {
 function overview(work) {
   const s = stats(work);
   return `<div class="wb-heading"><div><p class="wb-eyebrow">PROJECT / 创作项目</p><h1>${esc(work.title)}</h1><p>${esc(work.synopsis || '先写下故事的核心，接着把它变成一个个镜头。')}</p></div><div class="wb-actions">${button('edit-work', '作品设置', 'pencil')}${button('new-episode', '新建分集', 'plus', '', 'primary')}</div></div>
+  ${spatialEntry(work)}
   <div class="wb-stats"><div><span>分集</span><strong>${work.episodes.length}<small>集</small></strong></div><div><span>分镜</span><strong>${s.shots.length}<small>镜</small></strong></div><div><span>共享角色</span><strong>${work.characters.length}<small>位</small></strong></div><div><span>规划时长</span><strong>${Math.floor(s.duration / 60)}<small>分</small>${s.duration % 60}<small>秒</small></strong></div></div>
   <div class="wb-section-heading wb-large"><h2>分集工作区</h2><span>${work.format} 画幅 · ${s.done} 个分镜已完成</span></div>
   <div class="wb-episode-grid">${work.episodes
@@ -244,6 +246,20 @@ function overview(work) {
     )}<button class="wb-new-card" data-action="new-episode">${ico('plus')}<span>添加新的分集</span><small>让故事继续展开</small></button></div>
   <div class="wb-workflow"><div>${ico('file-text')}<b>01 剧本与分集</b><span>组织故事结构</span></div><div>${ico('users-round')}<b>02 角色与分镜</b><span>统一人物与画面</span></div><div>${ico('box')}<b>03 空间推演</b><span>设计站位与摄影机</span></div></div>`;
 }
+/** 将空间推演作为作品首页的主要创作入口，展示真实已保存场景数量。 */
+function spatialEntry(work) {
+  const shots = work.episodes.flatMap((episode) => episode.shots);
+  const saved = shots.filter((shot) => shot.spatial);
+  const image = saved.find((shot) => shot.image)?.image;
+  return `<section class="wb-spatial-entry"><div class="wb-spatial-intro"><p class="wb-eyebrow">3D SPACE / 核心创作工具</p><h2>空间推演</h2><p>搭建场景、安排人物站位，设计机位与走位。<br>在三维空间中预演，再把画面带回分镜。</p><div>${button('view-spatial', '进入空间推演', 'arrow-right', '', 'primary')}<span>${saved.length ? `${saved.length} 个场景可继续编辑` : '从一个场景开始创作'}</span></div></div><div class="wb-spatial-visual" aria-hidden="true">${image ? `<img src="${image}" alt="">` : `<div class="wb-spatial-grid"></div>${ico('box')}`}<span>人物站位 · 摄影机 · 走位预演</span></div></section>`;
+}
+/** 汇总作品各集的推演入口，明确每个按钮对应的分集与分镜。 */
+function spatialView(work) {
+  const entries = work?.episodes.flatMap((episode) => episode.shots.map((shot) => ({ episode, shot }))) || [];
+  const saved = entries.filter(({ shot }) => shot.spatial).length;
+  return `<div class="wb-heading"><div><p class="wb-eyebrow">3D SPACE / 空间推演</p><h1>把分镜放进真实的空间</h1><p>选择分镜，继续安排人物与摄影机；也可以直接进入独立编辑器，自由试拍。</p></div><a class="wb-independent-link" href="/?editor=1">${ico('box')} 打开独立 3D 编辑器 ${ico('arrow-right')}</a></div><div class="wb-list-toolbar"><strong>作品中的分镜场景</strong><span>${saved} 个已保存 · ${entries.length - saved} 个待搭建</span></div>${entries.length ? `<div class="wb-spatial-scenes">${entries.map(({ episode, shot }) => `<article class="wb-spatial-scene"><div class="wb-spatial-preview">${shot.image ? `<img src="${shot.image}" alt="${esc(shot.title)}的参考画面">` : `<div>${ico('box')}<span>${shot.spatial ? '已保存 3D 场景' : '等待搭建场景'}</span></div>`}<span>${shot.spatial ? '已有场景' : '待搭建'}</span></div><div class="wb-card-body"><p>${esc(episode.title)}</p><h3>${esc(shot.title)}</h3><footer><span>${shot.spatial ? `${shot.spatial.objects.length} 个场景对象` : `${shot.characterIds.length} 位关联角色`}</span>${button('open-spatial', shot.spatial ? '继续推演' : '开始推演', 'arrow-right', `data-id="${shot.id}" data-episode="${episode.id}"`, 'primary')}</footer></div></article>`).join('')}</div>` : empty('开始你的第一次空间推演', '直接打开独立编辑器，或先创建分镜，把场景保存到作品中。', !work ? 'new-work' : currentEpisode() ? 'new-shot' : 'new-episode', !work ? '创建作品' : currentEpisode() ? '创建分镜' : '创建分集')}`;
+}
+
 /** 渲染作品级共享角色卡片。 */
 function characters(work) {
   return `<div class="wb-heading"><div><p class="wb-eyebrow">CAST / 共享资产</p><h1>角色库 <small>${work.characters.length}</small></h1><p>一份角色设定，贯穿所有分集。每个分镜都可以引用这里的角色。</p></div>${button('new-character', '新建角色', 'plus', '', 'primary')}</div>${!work.characters.length ? empty('故事里都有谁？', '添加人物名称、形象和设定，再把角色关联到分镜。', 'new-character', '创建第一个角色') : `<div class="wb-character-grid">${work.characters.map((c) => `<article class="wb-character-card"><div class="wb-portrait" style="--character-color:${c.color}">${c.image ? `<img src="${c.image}" alt="${esc(c.name)}">` : `<span>${esc(c.name.slice(0, 1))}</span><small>角色形象待上传</small>`}<em>${esc(c.role || '角色')}</em></div><div class="wb-card-body"><h3>${esc(c.name)}</h3><p class="wb-clamp">${esc(c.description || '还没有角色设定')}</p><footer><span>${work.episodes.flatMap((e) => e.shots).filter((s) => s.characterIds.includes(c.id)).length} 个分镜引用</span>${button('edit-character', '编辑', 'pencil', `data-id="${c.id}"`)}</footer></div></article>`).join('')}</div>`}`;
@@ -657,7 +673,7 @@ async function handleClick(event) {
   if (action === 'new-shot') return openForm('shot');
   if (action === 'edit-shot') return openForm('shot', id);
   if (action === 'open-spatial') {
-    location.href = `/?${new URLSearchParams({ editor: '1', work: work.id, episode: ep.id, shot: id })}`;
+    location.href = `/?${new URLSearchParams({ editor: '1', work: work.id, episode: target.dataset.episode || ep.id, shot: id })}`;
     return;
   }
   if (action === 'shot-up' || action === 'shot-down')
